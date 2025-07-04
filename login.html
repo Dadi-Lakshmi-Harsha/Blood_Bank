@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Blood Bank Login</h1>
+    <p>Please log in to access your dashboard.</p>
+    <a href="{{ url_for('register') }}">Register</a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div>
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('login') }}">
+        <label for="role">Role:</label>
+        <select id="role" name="role" required>
+            <option value="user">User</option>
+            <option value="Admin">Admin</option>
+            <option value="Camp Coordinator">Camp Coordinator</option>
+            <option value="Registrar">Registrar</option>
+        </select>
+        
+        <label for="user_id">User ID:</label>
+        <input type="text" id="user_id" name="user_id" required>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        
+        <button type="submit">Login</button>
+    </form>
+
+    <h3>contact details</h3>
+    <h3>email: bloodbank@gmail.com</h3>
+    <h3>999-666-5421</h3>
+</body>
+</html>

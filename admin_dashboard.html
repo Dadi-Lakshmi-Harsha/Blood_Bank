@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { padding-top: 20px; }
+        #map { height: 400px; margin-bottom: 20px; }
+        .flash-messages { margin-bottom: 20px; }
+        .flash-success { color: green; }
+        .flash-error { color: red; }
+        .flash-info { color: blue; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome, {{ name }}!</h1>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger mb-3">Logout</a>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Add City Form -->
+        <h2>Add City</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label for="city_name">City Name:</label>
+                <input type="text" class="form-control" id="city_name" name="city_name" required>
+            </div>
+            <div class="form-group">
+                <label>City Location:</label>
+                <div id="map"></div>
+                <input type="hidden" id="latitude" name="latitude">
+                <input type="hidden" id="longitude" name="longitude">
+            </div>
+            <button type="submit" name="add_city" class="btn btn-primary">Add City</button>
+        </form>
+
+        <!-- Cities List -->
+        <h2>Cities</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>City ID</th>
+                    <th>Name</th>
+                    <th>Location (Lon, Lat)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for city in cities %}
+                    <tr>
+                        <td>{{ city[0] }}</td>
+                        <td>{{ city[1] }}</td>
+                        <td>
+                            {% if city[2] %}
+                                ({{ city[2][0] | float | round(6) }}, {{ city[2][1] | float | round(6) }})
+                            {% else %}
+                                Not set
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Add Employee Form -->
+        <h2>Add Employee</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label for="user_id">User ID:</label>
+                <input type="number" class="form-control" id="user_id" name="user_id" required>
+            </div>
+            <div class="form-group">
+                <label for="role">Role:</label>
+                <select class="form-control" id="role" name="role" required>
+                    <option value="Camp Coordinator">Camp Coordinator</option>
+                    <option value="Registrar">Registrar</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="salary">Salary:</label>
+                <input type="number" class="form-control" id="salary" name="salary" required>
+            </div>
+            <button type="submit" name="add_employee" class="btn btn-primary">Add Employee</button>
+        </form>
+
+        <!-- Update Employee Form -->
+        <h2>Update Employee</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label for="employee_id">Employee ID:</label>
+                <input type="number" class="form-control" id="employee_id" name="employee_id" required>
+            </div>
+            <div class="form-group">
+                <label for="role">Role:</label>
+                <select class="form-control" id="role" name="role" required>
+                    <option value="Camp Coordinator">Camp Coordinator</option>
+                    <option value="Registrar">Registrar</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="salary">Salary:</label>
+                <input type="number" class="form-control" id="salary" name="salary" required>
+            </div>
+            <button type="submit" name="update_employee" class="btn btn-primary">Update Employee</button>
+        </form>
+
+        <!-- Delete Employee Form -->
+        <h2>Delete Employee</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label for="employee_id">Employee ID:</label>
+                <input type="number" class="form-control" id="employee_id" name="employee_id" required>
+            </div>
+            <button type="submit" name="delete_employee" class="btn btn-danger">Delete Employee</button>
+        </form>
+
+        <!-- Statistics -->
+        <h2>Statistics</h2>
+        <p>Total Donations: {{ total_donations }}</p>
+        <p>Total Requests: {{ total_requests }}</p>
+        <p>Fulfilled Requests: {{ fulfilled_requests }}</p>
+        <h3>Inventory</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Blood Type</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in inventory_stats %}
+                    <tr>
+                        <td>{{ stat[0] }}</td>
+                        <td>{{ stat[1] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Employees List -->
+        <h2>Employees</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Role</th>
+                    <th>User ID</th>
+                    <th>Salary</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for emp in employees %}
+                    <tr>
+                        <td>{{ emp[0] }}</td>
+                        <td>{{ emp[1] }}</td>
+                        <td>{{ emp[2] }}</td>
+                        <td>{{ emp[3] }}</td>
+                        <td>{{ emp[4] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize Leaflet map
+        var map = L.map('map').setView([0, 0], 2); // Default view: center of the world
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Add marker for clicked location
+        var marker;
+        map.on('click', function(e) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker(e.latlng).addTo(map);
+            document.getElementById('latitude').value = e.latlng.lat.toFixed(6);
+            document.getElementById('longitude').value = e.latlng.lng.toFixed(6);
+        });
+    </script>
+</body>
+</html>

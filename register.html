@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Bank Registration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Blood Bank Registration</h1>
+    <form action="/register" method="POST">
+        <label for="name">Name:</label>
+        <input type="text" name="name" id="name" required>
+        <label for="blood_type">Blood Type:</label>
+        <select name="blood_type" id="blood_type" required>
+            <option value="" disabled selected>Select Blood Type</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+        </select>
+        <label for="city_id">City ID:</label>
+        <input type="number" name="city_id" id="city_id" required>
+        <label for="dob">Date of Birth (DD-MM-YYYY):</label>
+        <input type="date" name="dob" id="dob" required>
+        <label for="contact">Contact:</label>
+        <input type="text" name="contact" id="contact" required>
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" required>
+        <button type="submit">Register</button>
+    </form>
+    <p><a href="{{ url_for('index') }}">Back to Login</a></p>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="error">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+</body>
+</html>

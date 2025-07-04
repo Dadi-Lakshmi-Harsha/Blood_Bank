@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4">Welcome, {{ user_details.name }}!</h1>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="bg-{{ 'red' if category == 'error' else 'green' }}-100 border-{{ 'red' if category == 'error' else 'green' }}-400 text-{{ 'red' if category == 'error' else 'green' }}-700 px-4 py-3 rounded mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- User Details -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-semibold mb-4">Your Details</h2>
+            <table class="w-full text-left">
+                <tr class="border-b">
+                    <th class="py-2">Name</th>
+                    <td class="py-2">{{ user_details.name }}</td>
+                </tr>
+                <tr class="border-b">
+                    <th class="py-2">Blood Type</th>
+                    <td class="py-2">{{ user_details.blood_type }}</td>
+                </tr>
+                <tr class="border-b">
+                    <th class="py-2">City</th>
+                    <td class="py-2">{{ user_details.city_name }}</td>
+                </tr>
+                <tr class="border-b">
+                    <th class="py-2">Date of Birth</th>
+                    <td class="py-2">{{ user_details.dob | default('Not provided', true) }}</td>
+                </tr>
+                <tr class="border-b">
+                    <th class="py-2">Contact</th>
+                    <td class="py-2">{{ user_details.contact | default('Not provided', true) }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Donation Form -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-semibold mb-4">Record a Donation</h2>
+            <form method="POST" action="{{ url_for('user_dashboard') }}" class="mb-4">
+                <div class="mb-4">
+                    <label class="block text-gray-700">Donation Date</label>
+                    <input type="date" name="donation_date" class="w-full p-2 border rounded" required>
+                </div>
+                <button type="submit" name="submit_donation" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Donate</button>
+            </form>
+        </div>
+
+        <!-- Donation History -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-semibold mb-4">Donation History</h2>
+            {% if user_details.donations | length > 0 %}
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="py-2 px-4">Blood ID</th>
+                            <th class="py-2 px-4">Donation Date</th>
+                            <th class="py-2 px-4">Camp City</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for donation in user_details.donations %}
+                            <tr class="border-b">
+                                <td class="py-2 px-4">{{ donation.blood_id }}</td>
+                                <td class="py-2 px-4">{{ donation.donation_date }}</td>
+                                <td class="py-2 px-4">{{ donation.camp_city | default('Unknown', true) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="text-gray-600">No donations recorded.</p>
+            {% endif %}
+        </div>
+
+        <!-- Request History -->
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4">Request History</h2>
+            {% if user_details.requests | length > 0 %}
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="py-2 px-4">Request ID</th>
+                            <th class="py-2 px-4">Blood Type</th>
+                            <th class="py-2 px-4">Units Required</th>
+                            <th class="py-2 px-4">Request Date</th>
+                            <th class="py-2 px-4">Status</th>
+                            <th class="py-2 px-4">Blood Found</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in user_details.requests %}
+                            <tr class="border-b">
+                                <td class="py-2 px-4">{{ req.request_id }}</td>
+                                <td class="py-2 px-4">{{ req.blood_type }}</td>
+                                <td class="py-2 px-4">{{ req.units_required }}</td>
+                                <td class="py-2 px-4">{{ req.request_date }}</td>
+                                <td class="py-2 px-4">{{ req.status }}</td>
+                                <td class="py-2 px-4">{{ req.blood_found }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="text-gray-600">No requests recorded.</p>
+            {% endif %}
+        </div>
+
+        <!-- Logout Button -->
+        <div class="mt-6">
+            <a href="{{ url_for('logout') }}" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .alert { padding: 10px; margin: 10px 0; }
+        .alert-success { background-color: #d4edda; color: #155724; }
+        .alert-error { background-color: #f8d7da; color: #721c24; }
+        .alert-info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Registrar Dashboard</h1>
+        <p>View blood inventory, donations, requests, and submit blood requests.</p>
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div>
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <h2>Filter by User ID</h2>
+        <form method="POST">
+            <label for="filter_user_id">User ID (leave blank for all):</label>
+            <input type="text" id="filter_user_id" name="filter_user_id" value="{{ filter_user_id or '' }}">
+            <button type="submit" name="filter_user">Filter</button>
+        </form>
+
+        <h2>View Blood Inventory</h2>
+        <form method="POST">
+            <label for="city_id">Select City:</label>
+            <select id="city_id" name="city_id" required>
+                <option value="">-- Select a City --</option>
+                {% for city in cities %}
+                    <option value="{{ city[0] }}" {% if city[0]|string == selected_city_id %}selected{% endif %}>
+                        {{ city[1] }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit" name="view_inventory">View Inventory</button>
+        </form>
+
+        {% if inventory %}
+            <h3>Inventory for Selected City</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Blood Type</th>
+                        <th>Quantity</th>
+                        <th>City</th>
+                        <th>Earliest Expiry Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in inventory %}
+                    <tr>
+                        <td>{{ item[0] }}</td>
+                        <td>{{ item[1] }}</td>
+                        <td>{{ item[2] }}</td>
+                        <td>{{ item[3] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% elif selected_city_id %}
+            <p>No inventory found for the selected city.</p>
+        {% endif %}
+
+        <h2>Donations</h2>
+        {% if donations %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Donor Name</th>
+                        <th>Blood ID</th>
+                        <th>Blood Type</th>
+                        <th>Donation Date</th>
+                        <th>Camp City</th>
+                        <th>contact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donation in donations %}
+                    <tr>
+                        <td>{{ donation[0] }}</td>
+                        <td>{{ donation[1] }}</td>
+                        <td>{{ donation[2] }}</td>
+                        <td>{{ donation[3] }}</td>
+                        <td>{{ donation[4] }}</td>
+                        <td>{{ donation[5] }}</td>
+                        <td>{{ donation[6] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No donations found.</p>
+        {% endif %}
+
+        <h2>Blood Requests</h2>
+        {% if requests %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Request ID</th>
+                        <th>User ID</th>
+                        <th>Requester Name</th>
+                        <th>Employee ID</th>
+                        <th>Blood Type</th>
+                        <th>Units Required</th>
+                        <th>Request Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                    <tr>
+                        <td>{{ req[0] }}</td>
+                        <td>{{ req[1] }}</td>
+                        <td>{{ req[2] }}</td>
+                        <td>{{ req[3] }}</td>
+                        <td>{{ req[4] }}</td>
+                        <td>{{ req[5] }}</td>
+                        <td>{{ req[6] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No requests found.</p>
+        {% endif %}
+
+        <h2>Request Status</h2>
+        {% if request_status %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Process ID</th>
+                        <th>Request ID</th>
+                        <th>Blood ID</th>
+                        <th>Status</th>
+                        <th>Blood Found</th>
+                        <th>Date Approved</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for status in request_status %}
+                    <tr>
+                        <td>{{ status[0] }}</td>
+                        <td>{{ status[1] }}</td>
+                        <td>{{ status[2] or '-' }}</td>
+                        <td>{{ status[3] }}</td>
+                        <td>{{ status[4] or 'No' }}</td>
+                        <td>{{ status[5] or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No request status records found.</p>
+        {% endif %}
+
+        <h2>Request Blood</h2>
+        <form method="POST">
+            <label for="recipient_user_id">Recipient User ID:</label>
+            <input type="text" id="recipient_user_id" name="recipient_user_id" required>
+            <label for="blood_type">Blood Type:</label>
+            <select id="blood_type" name="blood_type" required>
+                <option value="">-- Select Blood Type --</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+            </select>
+            <label for="units_required">Units Required:</label>
+            <input type="number" id="units_required" name="units_required" min="1" required>
+            <label for="request_date">Request Date:</label>
+            <input type="date" id="request_date" name="request_date" required>
+            <button type="submit" name="request_blood">Submit Request</button>
+        </form>
+    </div>
+</body>
+</html>

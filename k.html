@@ -1,0 +1,216 @@
+{% comment %} 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camp Coordinator Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        .error { color: red; }
+        .success { color: green; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Camp Coordinator Dashboard</h1>
+    <p>Welcome, {{ name }}! Manage camps and blood requests in your city.</p>
+    <a href="{{ url_for('logout') }}">Logout</a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div>
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <h2>Add Camp</h2>
+    <form method="POST">
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" required>
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" required>
+        <button type="submit" name="add_camp">Add Camp</button>
+    </form>
+
+    <h2>Camps</h2>
+    {% if camps %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Camp ID</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for camp in camps %}
+                <tr>
+                    <td>{{ camp[0] }}</td>
+                    <td>{{ camp[1] }}</td>
+                    <td>{{ camp[2] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No camps found.</p>
+    {% endif %}
+
+    <h2>Blood Inventory</h2>
+    {% if inventory %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Blood Type</th>
+                    <th>Quantity</th>
+                    <th>Earliest Expiry Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in inventory %}
+                <tr>
+                    <td>{{ item[0] }}</td>
+                    <td>{{ item[1] }}</td>
+                    <td>{{ item[2] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h3>Inventory Levels</h3>
+        <canvas id="inventoryChart" width="400" height="200"></canvas>
+        <script>
+            const ctx = document.getElementById('inventoryChart').getContext('2d');
+            const bloodTypes = {{ inventory | map(attribute=0) | list | tojson }};
+            const quantities = {{ inventory | map(attribute=1) | list | tojson }};
+            const threshold = 5;
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: bloodTypes,
+                    datasets: [{
+                        label: 'Units Available',
+                        data: quantities,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Units'
+                            }
+                        }
+                    },
+                    plugins: {
+                        annotation: {
+                            annotations: {
+                                thresholdLine: {
+                                    type: 'line',
+                                    yMin: threshold,
+                                    yMax: threshold,
+                                    borderColor: 'red',
+                                    borderWidth: 2,
+                                    label: {
+                                        content: 'Minimum Threshold (5 units)',
+                                        enabled: true,
+                                        position: 'center'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+    {% else %}
+        <p>No inventory found.</p>
+    {% endif %}
+
+    <h2>Blood Requests</h2>
+    {% if requests %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Process ID</th>
+                    <th>Request ID</th>
+                    <th>Blood Type</th>
+                    <th>Units Required</th>
+                    <th>Requester Name</th>
+                    <th>Status</th>
+                    <th>Blood Found</th>
+                    <th>Blood ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                <tr>
+                    <td>{{ req[0] }}</td>
+                    <td>{{ req[1] }}</td>
+                    <td>{{ req[2] }}</td>
+                    <td>{{ req[3] }}</td>
+                    <td>{{ req[4] }}</td>
+                    <td>{{ req[5] }}</td>
+                    <td>{{ req[6] }}</td>
+                    <td>{{ req[7] or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No requests found.</p>
+    {% endif %}
+
+    <h2>Notifications (Pending Approvals)</h2>
+    {% if notifications %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Process ID</th>
+                    <th>Request ID</th>
+                    <th>Blood Type</th>
+                    <th>Units Required</th>
+                    <th>Requester Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for note in notifications %}
+                <tr>
+                    <td>{{ note[0] }}</td>
+                    <td>{{ note[1] }}</td>
+                    <td>{{ note[2] }}</td>
+                    <td>{{ note[3] }}</td>
+                    <td>{{ note[4] }}</td>
+                    <td>
+                        <form method="POST">
+                            <input type="hidden" name="process_id" value="{{ note[0] }}">
+                            <select name="status" required>
+                                <option value="yes">Approve</option>
+                                <option value="rejected">Reject</option>
+                            </select>
+                            <button type="submit" name="approve_status">Submit</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No pending approvals.</p>
+    {% endif %}
+</body>
+</html>
+
+ {% endcomment %}
