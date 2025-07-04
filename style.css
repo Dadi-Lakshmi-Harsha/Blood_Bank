@@ -1,0 +1,115 @@
+/* body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+    background-image: url('../bg.gif');} */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+     /* background-image: url('bg.gif');  /*Since bg.gif is in static*/  */
+    background-size: cover;
+    
+    background-position: center;
+}
+
+h1 {
+    text-align: center;
+    color: #c11414;
+}
+form {
+    width: 50%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+label {
+    display: block;
+    margin: 10px 0 5px;
+}
+input, select, button {
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+button {
+    background-color: #b22222;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #8b1a1a;
+}
+.error {
+    color: red;
+    text-align: center;
+    margin: 10px 0;
+}
+p, a {
+    text-align: center;
+}
+a {
+    color: #b22222;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+.alert {
+    padding: 15px;
+    margin: 10px 0;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #d6e9c6;
+}
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: #ebccd1;
+    color: #0c5460;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+th {
+    background-color: #f2f2f2;
+}
+.logout-btn {
+    display: inline-block;
+    margin: 10px 0;
+    padding: 5px 10px;
+    background-color: #dc3545;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.alert-warning {
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+    color: #8a6d3b;
+}
